@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Index() {
+export default function Settings() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the App!</Text>
-      <Text style={styles.subtitle}>This is your new home page.</Text>
+      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.subtitle}>This is the settings page.</Text>
     </View>
   );
 }
@@ -14,8 +14,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#f5f5f5",
   },
   title: {
     fontSize: 24,
