@@ -1,11 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import "react-native-reanimated";
+import "../components/global.css";
 
 export default function RootLayout() {
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const [fontLoaded] = useFonts({
+    Caviar: require("../assets/fonts/CaviarDreams.ttf"),
+    Comfortaa: require("../assets/fonts/Comfortaa-Regular.ttf"),
+    ComfortaaBold: require("../assets/fonts/Comfortaa-Bold.ttf"),
+  });
 
   useEffect(() => {
     const checkFirstLaunch = async () => {
@@ -19,6 +26,14 @@ export default function RootLayout() {
     };
     checkFirstLaunch();
   }, []);
+
+  if (!fontLoaded) {
+    return (
+      <View>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   if (!initialRoute) {
     return (

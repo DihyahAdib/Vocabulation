@@ -1,11 +1,13 @@
 import * as React from "react";
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 
 export default function Cards() {
   return (
     <View style={styles.container}>
-      <Text style={styles.cardText}>Something</Text>
-      <Button title="Press me" onPress={() => Alert.alert("Simple Button pressed")} />
+      <Text style={styles.header}>Flash Cards</Text>
+      <Text style={styles.title}>Create Flash Cards</Text>
+      <Button title="Create" />
+      <Button title="Word Bank" />
     </View>
   );
 }
@@ -29,8 +31,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  cardText: {
+  header: {
     fontSize: 32,
+    fontWeight: "bold",
+  },
+  title: {
+    fontSize: 28,
     fontWeight: "bold",
   },
 });

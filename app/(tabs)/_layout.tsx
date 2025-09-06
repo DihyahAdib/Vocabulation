@@ -1,9 +1,9 @@
 import { Tabs } from "expo-router";
 import { IconSymbol } from "../../components/ui/IconSymbol";
-
+import CustomTabBar from "../../components/ui/customTabBar";
 export default function TabLayout() {
   return (
-    <Tabs>
+    <Tabs tabBar={(prop) => <CustomTabBar {...prop} />}>
       <Tabs.Screen
         name="index"
         options={{
