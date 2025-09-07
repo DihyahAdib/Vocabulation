@@ -14,7 +14,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
           const icon = options.tabBarIcon({ color: isFocused ? "#ffffffff" : "#888888ff" });
-          const label = options.title !== undefined ? options.title : route.name;
+          //   const label = options.title !== undefined ? options.title : route.name;
 
           const onPress = () => {
             const event = navigation.emit({
