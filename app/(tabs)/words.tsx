@@ -192,7 +192,7 @@ export default function Words() {
 
       <BlurView intensity={50} tint="light" style={styles.glassCard}>
         <Text style={styles.wordBankTextH1}>Word Bank</Text>
-        <Text style={styles.wordBankTextH2}>Swipe left on a word to delete it.</Text>
+        <Text style={styles.wordBankTextH2}>Press a word item to delete it.</Text>
         {wordBank.map((word, index) => (
           <View key={word.current} style={styles.wordItemRow}>
             <Text style={styles.wordItemLeft} onPress={() => deleteWord(index)}>
