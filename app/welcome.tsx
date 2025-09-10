@@ -8,9 +8,9 @@ const { width, height } = Dimensions.get("window");
 
 const slides = [
   {
-    title: "Welcome to the App",
+    title: "Welcome to Vocabulation!",
     subtitle: "Discover features and get started quickly.",
-    bg: "#4CAF50",
+    bg: "#4caf8cff",
   },
   {
     title: "Track Your Progress",
@@ -20,7 +20,17 @@ const slides = [
   {
     title: "Stay Motivated",
     subtitle: "Unlock achievements as you go!",
-    bg: "#FF9800",
+    bg: "#432ab5ff",
+  },
+  {
+    title: "Super Word-Bank system",
+    subtitle: "Add, group, design & customize.",
+    bg: "#864690ff",
+  },
+  {
+    title: "Create Flash Cards",
+    subtitle: "Create flashcards using a dynamic wordbank.",
+    bg: "#469079ff",
     showButton: true,
   },
 ];
@@ -38,7 +48,9 @@ export default function WelcomePage() {
       width={width}
       height={height}
       data={slides}
-      autoPlay={false}
+      autoPlay={true}
+      autoPlayInterval={3500}
+      scrollAnimationDuration={500}
       loop={false}
       renderItem={({ item }) => (
         <View style={[styles.card, { backgroundColor: item.bg }]}>

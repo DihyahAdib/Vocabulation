@@ -14,11 +14,16 @@ export default function RootLayout() {
     ComfortaaBold: require("../assets/fonts/Comfortaa-Bold.ttf"),
   });
 
+  // TEMP: Clear hasLaunched on every app start for testing
+  // useEffect(() => {
+  //   AsyncStorage.removeItem("hasLaunched");
+  // }, []);
+
   useEffect(() => {
     const checkFirstLaunch = async () => {
       const hasLaunched = await AsyncStorage.getItem("hasLaunched");
       console.log("🚀 hasLaunched value:", hasLaunched);
-      if (hasLaunched === null) {
+      if (hasLaunched === null || hasLaunched === undefined) {
         setInitialRoute("welcome");
       } else {
         setInitialRoute("(tabs)");
