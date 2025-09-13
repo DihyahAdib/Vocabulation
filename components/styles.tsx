@@ -34,12 +34,18 @@ export const wordTextSizes = StyleSheet.create({
 });
 
 export const s = StyleSheet.create({
-  centeredView: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+
   modalView: {
-    margin: 20,
+    width: "80%",
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -49,22 +55,36 @@ export const s = StyleSheet.create({
   },
 
   Header: {
-    marginTop: 0,
-    textAlign: "left",
+    marginTop: 10,
     fontSize: 20,
     fontFamily: "ComfortaaBold",
   },
 
-  Text: { marginTop: 15, marginBottom: 15, textAlign: "center", fontFamily: "Comfortaa" },
+  Text: {
+    marginTop: 10,
+    alignSelf: "center",
+    fontFamily: "Comfortaa",
+    fontSize: 16,
+  },
+
+  saveButton: {
+    marginTop: 15,
+    backgroundColor: "#4CAF50",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: "100%",
+    alignItems: "center",
+  },
 
   closeButton: {
-    top: 10,
-    right: 10,
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    position: "absolute",
-    backgroundColor: "#2196F3",
+    marginTop: 10,
+    backgroundColor: "#f44336",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: "100%",
+    alignItems: "center",
   },
 
   textStyle: { color: "white", fontWeight: "bold", textAlign: "center", fontFamily: "Comfortaa" },
@@ -233,5 +253,21 @@ export const s = StyleSheet.create({
     color: "#414141",
     backgroundColor: "rgba(255, 255, 255, 1)",
   },
-  inputTop: { marginTop: "10%" },
+  inputTop: {
+    marginTop: "10%",
+  },
+  editText: {
+    height: 40,
+    width: "50%",
+    margin: 0,
+    padding: 0,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#bababa54",
+    fontSize: 18,
+    fontFamily: "Comfortaa",
+    textAlign: "center",
+    color: "#414141",
+    backgroundColor: "rgba(255, 255, 255, 1)",
+  },
 });

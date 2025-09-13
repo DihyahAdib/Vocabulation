@@ -4,9 +4,9 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { BlurView } from "expo-blur";
 import { Checkbox } from "expo-checkbox";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
-import { Alert, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { GestureHandlerRootView, RectButton, ScrollView } from "react-native-gesture-handler";
+import { useEffect, useRef, useState } from "react";
+import { Alert, Animated, Keyboard, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView, Pressable, RectButton, ScrollView } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { s } from "../../components/styles";
 
@@ -64,18 +64,22 @@ function WordBankTab({
   wordBank,
   renderRightActionForBank,
   renderLeftActionForBank,
-  isButtonVisible,
-  setButtonVisible,
-  setPromptVisible,
+  swipedWords,
+  setSwipedWords,
+  setPromptForCollectionCreationVisible,
+  setSelectedWord,
+  setEditForeign,
+  setEditNative,
+  setModalForEditingWordVisible,
 }: any) {
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 50, alignItems: "center" }}>
       <Text style={s.wordBankTextH2}>Hold Down a word to Edit.</Text>
 
-      {isButtonVisible && (
+      {swipedWords.length > 0 && (
         <View style={s.addToCollectionActionWrap}>
-          <RectButton onPress={() => setPromptVisible(true)}>
-            <Text style={s.wordBankTextH3}>Add vocab to collections</Text>
+          <RectButton onPress={() => setPromptForCollectionCreationVisible(true)}>
+            <Text style={s.wordBankTextH3}>Add {swipedWords.length} vocab(s) to collections</Text>
           </RectButton>
         </View>
       )}
@@ -89,17 +93,33 @@ function WordBankTab({
           containerStyle={s.swipeableContainer}
           onSwipeableOpen={(direction) => {
             if (direction === "right") {
-              setButtonVisible(true);
+              setSwipedWords((prev: Word[]) => {
+                if (!prev.find((w) => w.id === word.id)) {
+                  return [...prev, word];
+                }
+                return prev;
+              });
             }
           }}
           onSwipeableClose={() => {
-            setButtonVisible(false);
+            setSwipedWords((prev: Word[]) => prev.filter((w) => w.id !== word.id));
           }}
         >
-          <View style={s.wordItemRow}>
-            <Text style={s.wordItemLeft}>{word.foreign}</Text>
-            <Text style={s.wordItemRight}>{word.current}</Text>
-          </View>
+          <Pressable
+            key={word.id}
+            onLongPress={() => {
+              setSelectedWord(word);
+              setEditForeign(word.foreign);
+              setEditNative(word.current);
+              setModalForEditingWordVisible(true);
+            }}
+            delayLongPress={200}
+          >
+            <View style={s.wordItemRow}>
+              <Text style={s.wordItemLeft}>{word.foreign}</Text>
+              <Text style={s.wordItemRight}>{word.current}</Text>
+            </View>
+          </Pressable>
         </ReanimatedSwipeable>
       ))}
     </ScrollView>
@@ -129,6 +149,110 @@ function CollectionsTab({ categoryGroup, renderRightActionForCollections, render
   );
 }
 
+function EditWordModal({
+  isVisible,
+  setModalForEditingWordVisible,
+  selectedWord,
+  setSelectedWord,
+  editForeign,
+  setEditForeign,
+  editNative,
+  setEditNative,
+  setWordBank,
+}: any) {
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", (e) => {
+      Animated.timing(slideAnim, {
+        toValue: -e.endCoordinates.height / 2,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    const hideSub = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", () => {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [slideAnim]);
+
+  return (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setModalForEditingWordVisible(false)}
+    >
+      <View style={s.centeredView}>
+        <Animated.View
+          style={[
+            s.modalView,
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <Text style={s.Header}>Edit Word</Text>
+
+          <Text style={s.Text}>Edit Vocabulary</Text>
+          <TextInput
+            style={s.editText}
+            placeholder="Edit Vocabulary"
+            placeholderTextColor="#414141"
+            value={editForeign}
+            onChangeText={setEditForeign}
+          />
+
+          <Text style={s.Text}>Edit Translation</Text>
+          <TextInput
+            style={s.editText}
+            placeholder="Native Translation"
+            placeholderTextColor="#414141"
+            value={editNative}
+            onChangeText={setEditNative}
+          />
+
+          <TouchableOpacity
+            style={s.saveButton}
+            onPress={() => {
+              if (selectedWord) {
+                setWordBank((prev: any) =>
+                  prev.map((word: any) =>
+                    word.id === selectedWord.id ? { ...word, foreign: editForeign, current: editNative } : word
+                  )
+                );
+              }
+              setModalForEditingWordVisible(false);
+              setSelectedWord(null);
+            }}
+          >
+            <Text style={s.textStyle}>Save</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.closeButton}
+            onPress={() => {
+              setModalForEditingWordVisible(false);
+              setSelectedWord(null);
+            }}
+          >
+            <Text style={s.textStyle}>Cancel</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function Words() {
   const [foreignWord, setForeignWord] = useState("");
   const [currentLanguageWord, setCurrentLanguageWord] = useState("");
@@ -138,8 +262,16 @@ export default function Words() {
   const [categoryGroup, setCategoryGroup] = useState<Word[]>([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isButtonVisible, setButtonVisible] = useState(false);
-  const [isPromptVisible, setPromptVisible] = useState(false);
+  const [swipedWords, setSwipedWords] = useState<Word[]>([]);
+
+  const [isPromptForCollectionCreationVisible, setPromptForCollectionCreationVisible] = useState(false);
+  const [isModalForEditingWordVisible, setModalForEditingWordVisible] = useState(false);
+
+  const [selectedWord, setSelectedWord] = useState<Word | null>(null);
+  const [editForeign, setEditForeign] = useState("");
+  const [editNative, setEditNative] = useState("");
+
+  //const [selectedForCollection, setSelectedForCollection] = useState<Word[]>([]);
 
   const [isAlphabeticalSortForForeign, setAlphabeticalSortForForeign] = useState(false);
   const [isAlphabeticalSortForNative, setAlphabeticalSortForNative] = useState(false);
@@ -206,11 +338,23 @@ export default function Words() {
     }
   };
 
+  const addSwipedWordsToCategoryGroup = () => {
+    console.log("did something 1");
+    setCategoryGroup((prevCollectionArray) => {
+      const newOnes = swipedWords.filter((word) => !prevCollectionArray.find((w) => w.id === word.id));
+      console.log("did something 2");
+      return [...prevCollectionArray, ...newOnes];
+    });
+    setSwipedWords([]);
+    setPromptForCollectionCreationVisible(false);
+  };
+
+  // fix this one top one doesnt work
   const addWordToCategoryGroup = (wordToAdd: Word) => {
     const theNameOfTheCollection = categoryGroupName.trim();
     const alreadyExists = categoryGroup.some((item) => item.id === wordToAdd.id);
-    if (!alreadyExists) {
-      // setCategoryGroup((prevCollectionArray) => [...prevCollectionArray, wordToAdd]);
+    if (!alreadyExists && !theNameOfTheCollection) {
+      setCategoryGroup((prevCollectionArray) => [...prevCollectionArray, ...wordToAdd]);
     } else {
       Alert.alert("Word already in collections!");
     }
@@ -229,7 +373,6 @@ export default function Words() {
     else Alert.alert("Word-Bank is empty.");
   };
 
-  //should just and only delete the word that u swiped on when pressing the delete button that shows up
   const renderRightActionForBank = (word: Word) => {
     return (
       <View style={s.rightActionsWrap}>
@@ -240,12 +383,11 @@ export default function Words() {
     );
   };
 
-  //should just and only add words to collections (PROMPT users for confirmation before appending to collections)
   const renderLeftActionForBank = (word: Word) => {
     return (
       <View style={s.leftActionWrap}>
-        <RectButton style={s.addAction} onPress={() => addWordToCategoryGroup(word)}>
-          <FontAwesome name="square" size={20} color="#000" />
+        <RectButton style={s.addAction}>
+          <FontAwesome name="check" size={20} color="#000" />
         </RectButton>
       </View>
     );
@@ -265,7 +407,7 @@ export default function Words() {
     return (
       <View style={s.leftActionWrap}>
         <RectButton style={s.addAction}>
-          <FontAwesome name="square" size={20} color="#000" />
+          <FontAwesome name="check" size={20} color="#000" />
         </RectButton>
       </View>
     );
@@ -302,6 +444,7 @@ export default function Words() {
           <FontAwesome name="trash" size={24} color="#414141" onPress={deleteAllWordInBank} />
         </View>
 
+        {/* Filter Modal */}
         {setIsModalVisible && (
           <Modal
             animationType="fade"
@@ -350,13 +493,14 @@ export default function Words() {
           </Modal>
         )}
 
-        {setPromptVisible && (
+        {/* Collections Modal */}
+        {setPromptForCollectionCreationVisible && (
           <Modal
             animationType="fade"
             transparent={true}
-            visible={isPromptVisible}
+            visible={isPromptForCollectionCreationVisible}
             onRequestClose={() => {
-              setPromptVisible(!isPromptVisible);
+              setPromptForCollectionCreationVisible(!isPromptForCollectionCreationVisible);
             }}
           >
             <View style={s.centeredView}>
@@ -364,21 +508,40 @@ export default function Words() {
                 <Text style={s.Header}>Collections</Text>
                 <Text style={s.Text}>Choose A Category Name for your word collections</Text>
 
-                <TouchableOpacity style={s.closeButton} onPress={() => setPromptVisible(false)}>
-                  <Text style={s.textStyle}>Nevermind...</Text>
-                </TouchableOpacity>
-
                 <TextInput
                   style={[s.input]}
-                  placeholder="Native Translation"
-                  placeholderTextColor="#414141"
+                  placeholder="Category Name"
+                  placeholderTextColor="#41414178"
                   value={categoryGroupName}
                   onChangeText={setCategoryGroupName}
                 />
+
+                <TouchableOpacity style={s.saveButton}>
+                  <Text style={s.textStyle} onPress={addSwipedWordsToCategoryGroup}>
+                    Save
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={s.closeButton} onPress={() => setPromptForCollectionCreationVisible(false)}>
+                  <Text style={s.textStyle}>Cancel</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>
         )}
+
+        {/* Edit Word Modal */}
+        <EditWordModal
+          isVisible={isModalForEditingWordVisible}
+          setModalForEditingWordVisible={setModalForEditingWordVisible}
+          selectedWord={selectedWord}
+          setSelectedWord={setSelectedWord}
+          editForeign={editForeign}
+          setEditForeign={setEditForeign}
+          editNative={editNative}
+          setEditNative={setEditNative}
+          setWordBank={setWordBank}
+        />
 
         <BlurView intensity={50} tint="light" style={s.glassCard}>
           <Tab.Navigator
@@ -395,9 +558,13 @@ export default function Words() {
                   wordBank={wordBank}
                   renderRightActionForBank={renderRightActionForBank}
                   renderLeftActionForBank={renderLeftActionForBank}
-                  isButtonVisible={isButtonVisible}
-                  setButtonVisible={setButtonVisible}
-                  setPromptVisible={setPromptVisible}
+                  swipedWords={swipedWords}
+                  setSwipedWords={setSwipedWords}
+                  setPromptForCollectionCreationVisible={setPromptForCollectionCreationVisible}
+                  setSelectedWord={setSelectedWord}
+                  setEditForeign={setEditForeign}
+                  setEditNative={setEditNative}
+                  setModalForEditingWordVisible={setModalForEditingWordVisible}
                 />
               )}
             </Tab.Screen>
